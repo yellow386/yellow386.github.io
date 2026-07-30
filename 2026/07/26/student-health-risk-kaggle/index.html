@@ -1,0 +1,996 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.svg">
+  <link rel="icon" href="/img/favicon.svg">
+  
+    <link rel="canonical" href="https://zhichengyellow.github.io/2026/07/26/student-health-risk-kaggle/"/>
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Zhicheng Yellow">
+  <meta name="keywords" content="学习,生活,记录">
+  
+    <meta name="description" content="截至 2026 年 7 月 30 日，我在 Kaggle Playground Series Season 6 Episode 7：Predicting Student Health Risk 中，使用队伍 ZechHuang 的最佳提交拿到了 0.95290 的 Public Leaderboard 分数，实时排名第 10 名。最新榜单快照中，第 9 名同为 0.95290，第 8 名为 0.9">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从 0.87 到临时金牌线：一次 Kaggle 表格竞赛的实验管理、公开集成与行级优化复盘">
+<meta property="og:url" content="https://zhichengyellow.github.io/2026/07/26/student-health-risk-kaggle/index.html">
+<meta property="og:site_name" content="Zhicheng Yellow">
+<meta property="og:description" content="截至 2026 年 7 月 30 日，我在 Kaggle Playground Series Season 6 Episode 7：Predicting Student Health Risk 中，使用队伍 ZechHuang 的最佳提交拿到了 0.95290 的 Public Leaderboard 分数，实时排名第 10 名。最新榜单快照中，第 9 名同为 0.95290，第 8 名为 0.9">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-07-26T15:30:00.000Z">
+<meta property="article:modified_time" content="2026-07-30T07:09:25.223Z">
+<meta property="article:author" content="Zhicheng Yellow">
+<meta property="article:tag" content="机器学习">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="Kaggle">
+<meta property="article:tag" content="集成学习">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>从 0.87 到临时金牌线：一次 Kaggle 表格竞赛的实验管理、公开集成与行级优化复盘 - Zhicheng Yellow</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zhichengyellow.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Zhicheng Yellow</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/banner.svg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="从 0.87 到临时金牌线：一次 Kaggle 表格竞赛的实验管理、公开集成与行级优化复盘"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-07-26 23:30" pubdate>
+          2026年7月26日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          47 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">从 0.87 到临时金牌线：一次 Kaggle 表格竞赛的实验管理、公开集成与行级优化复盘</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>截至 2026 年 7 月 30 日，我在 Kaggle Playground Series Season 6 Episode 7：Predicting Student Health Risk 中，使用队伍 <code>ZechHuang</code> 的最佳提交拿到了 <code>0.95290</code> 的 Public Leaderboard 分数，实时排名第 10 名。最新榜单快照中，第 9 名同为 <code>0.95290</code>，第 8 名为 <code>0.95292</code>，第 1 名为 <code>0.95316</code>。</p>
+<p>这不是最终金牌结论。比赛截止时间是 2026 年 7 月 31 日 23:59，Private Leaderboard 的最终排名未知。更重要的是，<code>0.95290</code> 不能被描述成纯粹由我自训练模型取得的泛化成绩。它属于一条充分利用公开预测资源、公开 Notebook 和提交差异分析的“公开资源策略线”。我的自训练模型在这条路线中主要承担验证、筛选和支持票的角色。</p>
+<p>这篇文章想复盘的不是“如何抄一个高分文件”，而是一个普通表格分类基线如何逐步变成可复现的实验体系：先建立本地建模能力，再分析公开预测文件，最后在高分区间针对少量决策边界样本做受保护、可解释的行级探针。</p>
+<h2 id="1-比赛指标决定了策略"><a href="#1-比赛指标决定了策略" class="headerlink" title="1. 比赛指标决定了策略"></a>1. 比赛指标决定了策略</h2><p>比赛任务是预测学生的健康风险 <code>health_condition</code>，共有三个类别：<code>at-risk</code>、<code>fit</code> 和 <code>unhealthy</code>。评价指标不是普通 Accuracy，而是 Balanced Accuracy：各类别 Recall 的平均值。</p>
+<p>对于三分类问题：</p>
+<p>$$<br>\mathrm{Balanced\ Accuracy} &#x3D;<br>\frac{\mathrm{Recall}<em>{at-risk} + \mathrm{Recall}</em>{fit} + \mathrm{Recall}_{unhealthy}}{3}<br>$$</p>
+<p>这一定义直接影响模型训练和后期提交修改。假设某类别有 $N_c$ 个真实样本，修改一行预测对这个类别 Recall 的影响大约是 $1&#x2F;N_c$；对三分类 Balanced Accuracy 的影响约为：</p>
+<p>$$<br>\frac{1}{3 \times N_c}<br>$$</p>
+<p>因此，一行预测不是简单的“改对加分、改错扣分”。如果某个类别样本较少，一次错误修改对该类别 Recall 的损失可能明显大于多数类一次改对带来的收益。后期面对 <code>fit</code>、<code>unhealthy</code> 等类别时，不能因为某个模型更自信就随意替换标签。</p>
+<h2 id="2-两条必须分开的实验路线"><a href="#2-两条必须分开的实验路线" class="headerlink" title="2. 两条必须分开的实验路线"></a>2. 两条必须分开的实验路线</h2><p>整个项目后来形成了双轨结构。</p>
+<table>
+<thead>
+<tr>
+<th>路线</th>
+<th>主要目标</th>
+<th align="right">最佳分数</th>
+<th>优势</th>
+<th>风险</th>
+<th>能否代表模型泛化能力</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>自训练线</td>
+<td>衡量特征、模型和验证能力</td>
+<td align="right">本地约 0.949995；Public LB 约 0.94959</td>
+<td>可复现、可解释、能独立迭代</td>
+<td>验证集过拟合，迁移到榜单不稳定</td>
+<td>更接近，但仍不能由一次划分完全证明</td>
+</tr>
+<tr>
+<td>公开资源线</td>
+<td>分析高分提交和公开模型工件</td>
+<td align="right">0.95290</td>
+<td>能利用多来源共识，适合高分区间微调</td>
+<td>容易排行榜过拟合，Private LB 风险更高</td>
+<td>不能冒充纯自训练泛化能力</td>
+</tr>
+</tbody></table>
+<p>这两条线都重要，但回答的是不同问题。自训练线回答“我能不能建立一个有效的表格模型”；公开资源线回答“已有公开信息中，哪些预测差异值得进一步验证”。把它们混写，最终就会把公开方案贡献的分数误记到自己的模型上。</p>
+<h2 id="3-从普通基线到-0-9499"><a href="#3-从普通基线到-0-9499" class="headerlink" title="3. 从普通基线到 0.9499"></a>3. 从普通基线到 0.9499</h2><p>最初的普通基线 Public LB 只有 <code>0.87064</code>。加入类别权重和基础特征工程后，weighted HistGradientBoosting 的 Public LB 提升到 <code>0.94740</code>。继续加入比例特征、调整参数并进行 HGB 集成后，最佳单个 HGB 达到 <code>0.94990</code>，HGB 本地集成为 <code>0.94993</code>。</p>
+<p>这一段最有价值的结论并不是“某个参数是多少”，而是优化顺序：先让训练目标与评价指标一致，再改善特征表达，最后才考虑增加模型复杂度。对于类别不平衡问题，普通 Accuracy 导向的决策边界并不一定适合 Balanced Accuracy；类别权重和比例特征往往比盲目堆叠模型更有效。</p>
+<p>随后我尝试了 LightGBM、CatBoost 和 XGBoost。共享验证集上的结果如下：</p>
+<ul>
+<li>LightGBM：<code>0.949252</code></li>
+<li>快速 CatBoost：<code>0.949219</code></li>
+<li>HGB + LGBM，权重为 0.8&#x2F;0.2：<code>0.949764</code></li>
+<li>相同划分下 HGB 单独约为：<code>0.949733</code></li>
+</ul>
+<p>LGBM 和 CatBoost 单独没有超过 HGB，概率融合的提升也很有限。于是我尝试 selective switching：以 HGB 为主预测器，只在 HGB 与 LGBM 分歧且 HGB 置信度较低时切换到 LGBM。</p>
+<p>初步规则的本地验证为 <code>0.949867</code>，加入按类别转换方向设置的不同阈值后，<code>greedy_v2</code> 达到 <code>0.949995</code>。其思路包括：默认要求 HGB margin 小于 <code>0.09</code> 且 LGBM margin 大于 <code>0.065</code>；禁止 <code>at-risk -&gt; fit</code>；对 <code>at-risk -&gt; unhealthy</code> 使用更严格阈值；<code>fit -&gt; at-risk</code> 要求更高的 LGBM 置信度；<code>unhealthy -&gt; at-risk</code> 要求 LGBM margin 大于 <code>0.20</code>。</p>
+<p>但这套规则实际 Public LB 只有 <code>0.94959</code>。本地验证提高，并没有证明 pair-specific threshold 能够迁移到测试集。它只说明这套规则在当前切分上有效，甚至可能已经在利用切分噪声。</p>
+<h2 id="4-本地验证为什么会欺骗我们"><a href="#4-本地验证为什么会欺骗我们" class="headerlink" title="4. 本地验证为什么会欺骗我们"></a>4. 本地验证为什么会欺骗我们</h2><p>在本地验证中，我还尝试过 class multiplier。它能让验证分数上升，但实际 Public LB 降到 <code>0.94978</code>。XGBoost 也没有超过 HGB，单独 LGBM 和 CatBoost 依然较弱。</p>
+<p>这些失败实验可以用下面的方式记录，而不是简单删掉：</p>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>改动规模</th>
+<th>结果</th>
+<th>被证伪的内容</th>
+<th>后续决策</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>class multiplier 能改善少数类召回并迁移</td>
+<td>全量预测</td>
+<td>Public LB 降至 0.94978</td>
+<td>本地权重收益不等于榜单收益</td>
+<td>保留为局部分析，不作为最终提交</td>
+</tr>
+<tr>
+<td>XGBoost 能提供明显互补性</td>
+<td>替换主模型</td>
+<td>未超过 HGB</td>
+<td>模型名称更复杂不代表更强</td>
+<td>不继续围绕 XGBoost 堆参数</td>
+</tr>
+<tr>
+<td>单切分上的 greedy_v2 能稳定切换边界样本</td>
+<td>少量条件替换</td>
+<td>本地 0.949995，Public LB 0.94959</td>
+<td>pair-specific 阈值容易过拟合</td>
+<td>后期只把它当辅助信号</td>
+</tr>
+<tr>
+<td>扩大 margin 阈值能覆盖更多有效样本</td>
+<td>扩大候选集</td>
+<td>分数下降</td>
+<td>有效区域很窄</td>
+<td>使用严格 consensus gate</td>
+</tr>
+<tr>
+<td>按类别转换进一步过滤会降低风险</td>
+<td>类别方向过滤</td>
+<td>公开融合降至 0.95094</td>
+<td>直觉过滤未必符合真实测试分布</td>
+<td>停止叠加规则</td>
+</tr>
+<tr>
+<td>将 0.95264 中 13 行恢复为旧标签更可靠</td>
+<td>修改 13 行</td>
+<td>0.95264 降至 0.95262</td>
+<td>本地反对不等于测试行错误</td>
+<td>不继续扩大同类回退</td>
+</tr>
+<tr>
+<td>Notebook 声称的 Top-15 修正能达到 0.95271+</td>
+<td>修改 2 行</td>
+<td>仍为 0.95264</td>
+<td>标题和日志不是可复现实验</td>
+<td>必须哈希、diff、实测</td>
+</tr>
+</tbody></table>
+<p>验证集、Public LB 和 Private LB 是三种不同证据。验证集用于快速迭代，Public LB 用于有限的外部检验，Private LB 才是最终评估。把 Public LB 当成可以无限查询的验证集，会把实验变成抽奖，也会快速消耗提交额度。</p>
+<h2 id="5-从模型集成转向提交文件集成"><a href="#5-从模型集成转向提交文件集成" class="headerlink" title="5. 从模型集成转向提交文件集成"></a>5. 从模型集成转向提交文件集成</h2><p>当自训练模型稳定在 0.9499 附近后，继续调整单模型的边际收益很低。此时我开始分析多个公开提交文件。</p>
+<p>早期公开融合达到 <code>0.95075</code>，hill-climbing pool 达到 <code>0.95062</code>，top-5 hill-climbing 达到 <code>0.95074</code>。在基础公开融合上加入 margin switch 后，分数达到 <code>0.95089</code>；要求至少两个模型支持切换后，提升到 <code>0.95094</code>。</p>
+<p>之后使用 residual patch，只修改同时满足以下条件的行：当前预测仍等于原公开融合结果、margin 小于 <code>0.01</code>、<code>greedy_v2</code> 与 hill-climbing pool 对新标签达成一致，并且新标签不同于当前预测。最终得到 <code>0.95096</code>。</p>
+<p>阈值试验显示：</p>
+<ul>
+<li><code>0.0075</code>：<code>0.95095</code></li>
+<li><code>0.0100</code>：<code>0.95096</code></li>
+<li><code>0.0125</code>：<code>0.95096</code></li>
+<li><code>0.0150</code>：<code>0.95095</code></li>
+</ul>
+<p>有效区域很窄，扩大候选范围反而伤害分数。后期的收益不再来自重新训练所有样本，而是来自少数模型分歧、且证据相对充分的边界样本。</p>
+<p>下载约 20 个公开提交文件后，我发现它们的分数范围为 <code>0.94899</code> 至 <code>0.95112</code>，但高分文件之间通常有 99.9% 以上的标签一致率。top-3、top-8 majority 和小范围多数票修补都没有自动超过最强单文件。</p>
+<p>这说明提交文件可以被视为一种“硬标签模型输出”，但公开分数不等于真实概率。公开池最有价值的用途，是定位少量分歧行，分析高分方案之间的增量修正，而不是无条件多数投票。</p>
+<p>提交文件之间的差异可以这样分析：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd<br><br>left = pd.read_csv(<span class="hljs-string">&quot;anchor.csv&quot;</span>).set_index(<span class="hljs-string">&quot;id&quot;</span>)<br>right = pd.read_csv(<span class="hljs-string">&quot;candidate.csv&quot;</span>).set_index(<span class="hljs-string">&quot;id&quot;</span>)<br><br>diff = left[<span class="hljs-string">&quot;health_condition&quot;</span>] != right[<span class="hljs-string">&quot;health_condition&quot;</span>]<br>changed = pd.DataFrame(&#123;<br>    <span class="hljs-string">&quot;old&quot;</span>: left.loc[diff, <span class="hljs-string">&quot;health_condition&quot;</span>],<br>    <span class="hljs-string">&quot;new&quot;</span>: right.loc[diff, <span class="hljs-string">&quot;health_condition&quot;</span>],<br>&#125;)<br><br>transition = pd.crosstab(changed[<span class="hljs-string">&quot;old&quot;</span>], changed[<span class="hljs-string">&quot;new&quot;</span>])<br><span class="hljs-built_in">print</span>(<span class="hljs-built_in">len</span>(changed))<br><span class="hljs-built_in">print</span>(transition)<br></code></pre></td></tr></table></figure>
+
+<p>这类 transition matrix 能告诉我们候选文件究竟改变了哪些方向，例如 <code>unhealthy -&gt; at-risk</code> 是否是主要增量，而不是只看文件名上的分数。</p>
+<h2 id="6-暂停后重新追赶公开进展"><a href="#6-暂停后重新追赶公开进展" class="headerlink" title="6. 暂停后重新追赶公开进展"></a>6. 暂停后重新追赶公开进展</h2><p>项目暂停一段时间后，我在 2026 年 7 月 26 日重新检查比赛，发现新的公开高分线：<code>0.95238</code>、<code>0.95256</code>、<code>0.95264</code>、<code>0.95267</code> 和 <code>0.95271</code>。</p>
+<p>先提交 <code>0.95264</code> 文件，实际得分为 <code>0.95264</code>。它与 <code>0.95256</code> 只有 49 行不同。旧的 0.95238 高分集群在这 49 行上几乎都支持 0.95256，但 Public LB 已经证明 0.95264 更高。我的本地 greedy_v2 在 49 行中支持 0.95264 的有 36 行，支持 0.95256 的有 13 行。</p>
+<p>于是我尝试把这 13 行恢复为 0.95256 的标签，结果降到 <code>0.95262</code>。这次失败非常重要：本地模型支持并不等于这些特定测试行的真实标签；只改 13 行也足以产生可见下降。Public LB 的变化应该用来证伪假设，而不是事后编故事。一次规则失败后，也不应该继续扩大同一规则。</p>
+<p>另一个公开 Notebook 的标题声称可以达到 <code>0.95271+</code>，实际 Top-15 文件相对 0.95264 只改了两行：<code>878262</code> 从 <code>fit</code> 改为 <code>at-risk</code>，<code>884567</code> 从 <code>unhealthy</code> 改为 <code>at-risk</code>。实际提交仍是 <code>0.95264</code>。</p>
+<p>因此，Notebook 标题、说明和日志只能作为线索。必须比较文件哈希、逐行差异并实际提交验证。后来找到的更新公开预测数据集包含 <code>0.95264.csv</code>、<code>0.95267.csv</code> 和 <code>0.95271.csv</code>，其中 0.95271 文件还被多个独立公开 Notebook 复现，文件哈希完全相同。实际提交得到 <code>0.95271</code>，它才成为可信的新锚点。</p>
+<h2 id="7-Cross-family-frontier：把模型共识变成候选排序"><a href="#7-Cross-family-frontier：把模型共识变成候选排序" class="headerlink" title="7. Cross-family frontier：把模型共识变成候选排序"></a>7. Cross-family frontier：把模型共识变成候选排序</h2><p>以 0.95271 为锚点后，我下载了公开 cross-family 模型预测工件。三个核心概率模型是 RealMLP、FT-Transformer 和 XGBoost；四个硬标签辅助模型是 TabPFN-3、Bagged TabPFN、Local GBDT 和 Independent LightGBM。部分模型概率还进行了 prior correction，避免类别先验影响直接 argmax。</p>
+<p>frontier 的基本构造过程如下：</p>
+<ol>
+<li>以受保护的 0.95264 anchor 为基础。</li>
+<li>标记从 0.95256 到 0.95264 已验证的行，后续规则不得覆盖。</li>
+<li>找到三个核心概率模型预测完全一致、且与当前 anchor 不同的行。</li>
+<li>计算四个辅助模型支持目标标签的数量。</li>
+<li>对每个核心模型计算目标类别概率与 anchor 类别概率的比值。</li>
+<li>取三个比值中的最小值作为 <code>minimum_probability_ratio</code>。</li>
+<li>先按辅助模型支持数排序，再按最小概率比降序排序。</li>
+</ol>
+<p>最终得到 319 个 eligible unanimous disagreements。使用最小概率比而不是平均概率比，是因为平均值可能被某个异常自信的模型主导；最小值要求所有核心模型都提供足够强的相对证据，是更保守的置信度。</p>
+<p>可以将核心逻辑简化为：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs python">eligible = (<br>    (realmlp_label == ft_label) &amp;<br>    (ft_label == xgb_label) &amp;<br>    (realmlp_label != anchor_label) &amp;<br>    (~already_applied)<br>)<br><br>frontier = candidates[eligible].copy()<br>frontier[<span class="hljs-string">&quot;auxiliary_support&quot;</span>] = (<br>    (tabpfn == frontier[<span class="hljs-string">&quot;proposed&quot;</span>]) +<br>    (bagged_tabpfn == frontier[<span class="hljs-string">&quot;proposed&quot;</span>]) +<br>    (local_gbdt == frontier[<span class="hljs-string">&quot;proposed&quot;</span>]) +<br>    (independent_lgbm == frontier[<span class="hljs-string">&quot;proposed&quot;</span>])<br>)<br><br>frontier[<span class="hljs-string">&quot;minimum_probability_ratio&quot;</span>] = frontier[<br>    [<span class="hljs-string">&quot;realmlp_ratio&quot;</span>, <span class="hljs-string">&quot;ft_ratio&quot;</span>, <span class="hljs-string">&quot;xgb_ratio&quot;</span>]<br>].<span class="hljs-built_in">min</span>(axis=<span class="hljs-number">1</span>)<br><br>frontier = frontier.sort_values(<br>    [<span class="hljs-string">&quot;auxiliary_support&quot;</span>, <span class="hljs-string">&quot;minimum_probability_ratio&quot;</span>],<br>    ascending=[<span class="hljs-literal">False</span>, <span class="hljs-literal">False</span>]<br>)<br></code></pre></td></tr></table></figure>
+
+<p>原公开 cross-family 方案只使用 frontier 前 30 行。我进一步标记 0.95271 已经应用的行，从最高排名的未应用行开始检查，只考虑 <code>unhealthy -&gt; at-risk</code>，优先要求本地 greedy_v2 也支持 <code>at-risk</code>，并避免高风险的 <code>fit</code> 类别转换。</p>
+<p>这里不能把 <code>unhealthy -&gt; at-risk</code> 写成必然正确。它之所以成为最终主方向，是因为在当前 frontier 顶部，多个独立模型集中对这些行产生该方向的分歧，已有公开高分 lineage 中也多次出现，本地模型还能提供辅助支持；同时，在有限提交预算下，它的风险收益比看起来比涉及 <code>fit</code> 的转换更合理。</p>
+<p>OOF 代理回测也提供了一点约束：把 RealMLP、FT-Transformer、XGBoost 轮流作为 proxy anchor，用其他模型尝试修正时，三种 proxy 的 top-3 都是 3 correct、0 wrong。但随着 cap 扩大，不同 proxy 的收益开始分化。这说明 frontier 顶部可能比较可信，却不能无限向后扩展。</p>
+<h2 id="8-从-0-95271-到-0-95273：第一阶段探针"><a href="#8-从-0-95271-到-0-95273：第一阶段探针" class="headerlink" title="8. 从 0.95271 到 0.95273：第一阶段探针"></a>8. 从 0.95271 到 0.95273：第一阶段探针</h2><p>最后的过程采用非常小的增量探针：</p>
+<table>
+<thead>
+<tr>
+<th>基础文件</th>
+<th>新增 rank</th>
+<th align="right">累计修改行数</th>
+<th align="right">Public LB</th>
+<th>结论</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0.95271</td>
+<td>33、35、37</td>
+<td align="right">3</td>
+<td align="right">0.95272</td>
+<td>top-3 有效</td>
+</tr>
+<tr>
+<td>上一版本</td>
+<td>38</td>
+<td align="right">4</td>
+<td align="right">0.95272</td>
+<td>提升被五位小数隐藏或收益很小</td>
+</tr>
+<tr>
+<td>上一版本</td>
+<td>39</td>
+<td align="right">5</td>
+<td align="right">0.95272</td>
+<td>没有可见提升</td>
+</tr>
+<tr>
+<td>上一版本</td>
+<td>40、43</td>
+<td align="right">7</td>
+<td align="right">0.95273</td>
+<td>达到临时金牌线</td>
+</tr>
+<tr>
+<td>上一版本</td>
+<td>46、47</td>
+<td align="right">9</td>
+<td align="right">0.95273</td>
+<td>没有可见提升，保留 7 行版本</td>
+</tr>
+</tbody></table>
+<p>最终 7 行版本修改的 ID 是：</p>
+<p><code>807495</code>、<code>809654</code>、<code>841243</code>、<code>863928</code>、<code>889117</code>、<code>915361</code>、<code>744637</code>。</p>
+<p>它们全部是 <code>unhealthy -&gt; at-risk</code>。最终文件为 <code>submission_goldprobe_frontier_top7_unhealthy.csv</code>。</p>
+<p>相同的显示分数不代表新增行完全没有影响，五位小数可能隐藏了差异。但在缺乏更强证据时，应该保留修改更少的文件。更少的改动通常意味着更低的 Private LB 风险。最佳提交和结构不同的备用文件都应该永久保留，不应因为还有提交次数就强行继续试验。</p>
+<h2 id="9-从-0-95273-继续追赶：公开-lineage-的增量审计"><a href="#9-从-0-95273-继续追赶：公开-lineage-的增量审计" class="headerlink" title="9. 从 0.95273 继续追赶：公开 lineage 的增量审计"></a>9. 从 0.95273 继续追赶：公开 lineage 的增量审计</h2><p>7 月 27 日之后，项目不再只是围绕原始 frontier 做局部修改，而是开始审计新的、经过实际 Public LB 验证的公开预测 lineage。这里的关键规则是：不同作者的文件只有在逐行 diff 和 SHA-256 检查后，才能判断它们是独立证据，不能因为作者不同就默认预测独立。</p>
+<p>Anhad 的 <code>0.95272 -&gt; 0.95274</code> 文件相对当前版本提供了 9 个不重叠修正，合并后得到 <code>0.95277</code>。之后，Rayk 的 <code>0.95275 -&gt; 0.95281</code> 文件与 Zoli、Ripon 发布的版本具有完全相同的 SHA-256，因此它们属于同一个预测家族，而不是三个独立增量。该家族相对当时最佳文件提供了 33 个可直接应用的新行，提交后得到 <code>0.95283</code>。</p>
+<p>这一步改变了我对“公开方案数量”的理解：三个名字不同的 Notebook 可能只是同一个文件的不同发布入口。只有经过哈希和行级差异确认，才能知道一个增量到底是独立来源，还是同一预测向量的重复证明。</p>
+<h3 id="Naji-的八行增量与留一撤回"><a href="#Naji-的八行增量与留一撤回" class="headerlink" title="Naji 的八行增量与留一撤回"></a>Naji 的八行增量与留一撤回</h3><p>7 月 30 日，Naji 发布并实际验证了 <code>0.95288</code> 的文件。下载文件与 Notebook 输出 SHA-256 一致，相对共享的 Rayk-Zoli-Ripon <code>0.95281</code> 向量恰好改变 8 行：<code>737832</code>、<code>772297</code>、<code>779493</code>、<code>792297</code>、<code>833325</code>、<code>892445</code>、<code>913483</code>、<code>982288</code>。</p>
+<p>把这八行增量合并到前一版本后，得到 <code>0.95289</code>，比此前最佳提高 <code>0.00006</code>。但八行并不意味着每一行都有效。随后做留一分析，只撤回 <code>982288</code>，候选文件得到 <code>0.95290</code>，因此将 <code>submission_goldprobe_local289_revert_982288.csv</code> 提升为当前最佳。</p>
+<p>其余撤回实验中，<code>913483</code>、<code>892445</code> 以及若干 <code>at-risk -&gt; unhealthy</code> 行在五位小数下显示中性；全部撤回五个相关行则回到 <code>0.95283</code>。这说明多行改动可能存在抵消，显示分数中性也不等于每一行没有影响。最终保留 <code>982288</code> 的撤回版本作为公开榜最佳，同时保留其他结构不同的版本作为 Private Leaderboard 备用候选。</p>
+<table>
+<thead>
+<tr>
+<th>日期</th>
+<th>来源或实验</th>
+<th>关键变化</th>
+<th align="right">Public LB</th>
+<th>决策</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2026-07-27</td>
+<td>Anhad 独立公开文件</td>
+<td>合并 9 个不重叠修正</td>
+<td align="right">0.95277</td>
+<td>提升为阶段最佳</td>
+</tr>
+<tr>
+<td>2026-07-29</td>
+<td>Rayk&#x2F;Zoli&#x2F;Ripon 共享家族</td>
+<td>应用 33 个可验证的新行</td>
+<td align="right">0.95283</td>
+<td>识别为同源家族，保留小文件回退</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Naji 八行增量</td>
+<td>与前一层不重叠地合并 8 行</td>
+<td align="right">0.95289</td>
+<td>进入逐行分解</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>撤回 <code>982288</code></td>
+<td>留一法移除 <code>fit -&gt; at-risk</code></td>
+<td align="right">0.95290</td>
+<td>成为当前最佳</td>
+</tr>
+</tbody></table>
+<p>这段经历再次说明，后期提交的核心不是“再找一个更复杂的模型”，而是把公开方案拆成可验证的增量，并用最小实验识别真正贡献分数的行。</p>
+<h2 id="10-公开资源不是免费的验证集"><a href="#10-公开资源不是免费的验证集" class="headerlink" title="10. 公开资源不是免费的验证集"></a>10. 公开资源不是免费的验证集</h2><p>这个项目还暴露了不少工程问题。Kaggle CLI 曾出现 <code>401 Unauthorized</code>，原因是认证路径不一致；修正 access_token 路径后恢复。多次 <code>400 Bad Request</code> 后发现，问题实际与当日提交次数达到上限有关，而不是 CSV 文件损坏。遇到错误时，应先查询 submissions 历史和 API 响应，不要根据状态码直接猜测。</p>
+<p>公开资源的使用也必须有归因意识：公开预测文件、公开数据集和公开模型工件贡献了最终策略线的重要信息。文件名中的公开分数还会诱导我们围绕榜单反复拟合。对公开文件做差异分析是有价值的，但它不等同于重新获得真实标签，更不等同于证明模型在隐藏测试集上具备同样的泛化能力。</p>
+<h2 id="11-一套可复用的后期冲榜工作流"><a href="#11-一套可复用的后期冲榜工作流" class="headerlink" title="11. 一套可复用的后期冲榜工作流"></a>11. 一套可复用的后期冲榜工作流</h2><p>我最终采用了下面的实验管理方式。</p>
+<p>第一，使用 <code>EXPERIMENT_LOG.md</code> 记录每次实验，至少写明基础文件、修改行数、修改原因、支持来源、预期结果、实际 Public LB 和失败后被证伪的假设。自训练线与公开资源线分开记录。</p>
+<p>第二，文件名编码关键规则，例如 <code>margin_switch_t005_s2</code>、<code>frontier_top7_unhealthy</code>，并保存当前最佳、结构不同的备用文件和候选生成脚本。</p>
+<p>第三，每次提交前自动检查总行数、ID 唯一性、ID 顺序、列名、标签空间，以及与基准文件的差异行数：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">assert</span> <span class="hljs-built_in">len</span>(submission) == expected_rows<br><span class="hljs-keyword">assert</span> submission[<span class="hljs-string">&quot;id&quot;</span>].is_unique<br><span class="hljs-keyword">assert</span> <span class="hljs-built_in">list</span>(submission.columns) == [<span class="hljs-string">&quot;id&quot;</span>, <span class="hljs-string">&quot;health_condition&quot;</span>]<br><span class="hljs-keyword">assert</span> <span class="hljs-built_in">set</span>(submission[<span class="hljs-string">&quot;health_condition&quot;</span>]) &lt;= &#123;<br>    <span class="hljs-string">&quot;at-risk&quot;</span>, <span class="hljs-string">&quot;fit&quot;</span>, <span class="hljs-string">&quot;unhealthy&quot;</span><br>&#125;<br><span class="hljs-keyword">assert</span> submission[<span class="hljs-string">&quot;id&quot;</span>].tolist() == test_ids<br></code></pre></td></tr></table></figure>
+
+<p>第四，使用 SHA 哈希确认不同 Notebook 输出的文件是否真的相同；使用 transition matrix 分析标签变化；把候选生成脚本和最终 CSV 一起保留。<code>analyze_crossfamily_frontier.py</code> 负责重建 319 行 frontier、计算辅助支持数和最小概率比，并标记 <code>already_applied</code>。<code>generate_gold_microprobes.py</code> 负责从锚点生成小范围候选、按 ID 应用修正、校验输出格式，并生成 top-3、top-4、top-5、top-7、top-9 版本。</p>
+<p>第五，把每次提交设计成可证伪的实验。提交之前必须能回答：基础文件是什么？改了多少行？为什么改？哪些来源支持？如果下降，具体会放弃哪条假设？这样排行榜才是外部证据，而不是抽奖机。</p>
+<h2 id="12-关键分数演进"><a href="#12-关键分数演进" class="headerlink" title="12. 关键分数演进"></a>12. 关键分数演进</h2><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th align="right">Public LB</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>普通基线</td>
+<td align="right">0.87064</td>
+</tr>
+<tr>
+<td>weighted HGB</td>
+<td align="right">0.94740</td>
+</tr>
+<tr>
+<td>HGB 单模型</td>
+<td align="right">0.94990</td>
+</tr>
+<tr>
+<td>HGB ensemble</td>
+<td align="right">0.94993</td>
+</tr>
+<tr>
+<td>公开融合</td>
+<td align="right">0.95075</td>
+</tr>
+<tr>
+<td>margin + support</td>
+<td align="right">0.95094</td>
+</tr>
+<tr>
+<td>residual patch</td>
+<td align="right">0.95096</td>
+</tr>
+<tr>
+<td>新公开锚点</td>
+<td align="right">0.95264</td>
+</tr>
+<tr>
+<td>自训练 13 行回退</td>
+<td align="right">0.95262</td>
+</tr>
+<tr>
+<td>更新公开锚点</td>
+<td align="right">0.95271</td>
+</tr>
+<tr>
+<td>frontier top-3</td>
+<td align="right">0.95272</td>
+</tr>
+<tr>
+<td>frontier top-7</td>
+<td align="right">0.95273</td>
+</tr>
+<tr>
+<td>frontier top-9</td>
+<td align="right">0.95273</td>
+</tr>
+<tr>
+<td>Anhad 增量合并</td>
+<td align="right">0.95277</td>
+</tr>
+<tr>
+<td>Rayk&#x2F;Zoli&#x2F;Ripon 同源家族增量</td>
+<td align="right">0.95283</td>
+</tr>
+<tr>
+<td>Naji 八行增量</td>
+<td align="right">0.95289</td>
+</tr>
+<tr>
+<td>撤回 <code>982288</code> 后的当前最佳</td>
+<td align="right">0.95290</td>
+</tr>
+</tbody></table>
+<p>这张表同时展示了一个转折：前半段主要优化模型和特征，后半段主要优化公开文件之间的少量决策边界。两类分数都应该记录，但不能用同一种语言解释。</p>
+<h2 id="13-最终心得"><a href="#13-最终心得" class="headerlink" title="13. 最终心得"></a>13. 最终心得</h2><p>低分阶段优化模型，高分阶段优化决策边界，这是这次项目最直观的经验。类别权重、比例特征和合理验证能把普通基线从 0.87 推到接近 0.95；进入高分区间后，整体重训的收益迅速下降，提交差异、模型共识和少量受保护的行级修改才更有研究价值。</p>
+<p>但高分并不等于结论确定。验证集、Public LB 和 Private LB 是三种不同证据；公开预测文件可以分析，却会引入排行榜过拟合风险；最强模型不一定是最好的行级裁判；自训练模型可以作为支持票，却不能自动替代已经验证过的公开锚点。</p>
+<p>每次提交都应该是一场可证伪实验。失败实验和最佳模型一样值得保存，因为它们能阻止我们重复错误。越接近比赛截止时间，停止规则越重要：当 frontier 扩展到 rank 46、47 已经没有可见提升，当前已处于临时第 10 名，而新增证据不断减弱时，合理策略是保留 7 行版本并等待新的独立信号，而不是继续消费相同信息。</p>
+<p>截至 2026 年 7 月 30 日，这个项目的正确结论是：我到达了 <code>0.95290</code> 的临时 Public Leaderboard 第 10 名，与第 9 名同分，距离第 8 名还有 <code>0.00002</code>。这仍然不是最终金牌或最终排名结论，Private Leaderboard 结果未知。</p>
+<p>截至当前，最佳提交相对 <code>0.95271</code> 锚点累计有 59 行差异。它来自多层公开资源 lineage、自训练模型的辅助判断和逐行留一实验，而不是某一个自训练模型突然超过了所有公开方案。能长期复用的成果也不是某个偶然的七行或某个公开文件，而是把建模、公开资源分析、来源审计、提交验证和停止决策都变成可追踪、可复现、可被证伪的实验流程。</p>
+<p>另外，7 月 30 日的实验已经用完当日 10 次提交额度。下一步不应在同一信息基础上盲目消费额度，而应等待新的独立 <code>0.95290+</code> 公开工件，或者等额度刷新后只测试一个具有清晰来源和单变量假设的候选。当前最佳文件必须作为 fallback 永久保留。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/kaggle/" class="category-chain-item">kaggle</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" class="print-no-link">#机器学习</a>
+      
+        <a href="/tags/Python/" class="print-no-link">#Python</a>
+      
+        <a href="/tags/Kaggle/" class="print-no-link">#Kaggle</a>
+      
+        <a href="/tags/%E9%9B%86%E6%88%90%E5%AD%A6%E4%B9%A0/" class="print-no-link">#集成学习</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>从 0.87 到临时金牌线：一次 Kaggle 表格竞赛的实验管理、公开集成与行级优化复盘</div>
+      <div>https://zhichengyellow.github.io/2026/07/26/student-health-risk-kaggle/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Zhicheng Yellow</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年7月26日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/05/28/Spaceship-Titanic-kaggle/" title="Spaceship Titanic kaggle">
+                        <span class="hidden-mobile">Spaceship Titanic kaggle</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <span>© 2026 Zhicheng Yellow</span> <span class="mx-2">·</span> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
