@@ -21,15 +21,15 @@
   <meta name="author" content="Zhicheng Yellow">
   <meta name="keywords" content="学习,生活,记录">
   
-    <meta name="description" content="截至 2026 年 7 月 30 日，我在 Kaggle Playground Series Season 6 Episode 7：Predicting Student Health Risk 中，使用队伍 ZechHuang 的最佳提交拿到了 0.95290 的 Public Leaderboard 分数，实时排名第 10 名。最新榜单快照中，第 9 名同为 0.95290，第 8 名为 0.9">
+    <meta name="description" content="这篇文章需要先给出一个比阶段性高分更重要的最终结论：在比赛结束前，我的 Public Leaderboard 一度冲到第 7 名，但 Private Leaderboard 开放后，排名跌到了第六百多名。Public 榜看起来接近金牌，Private 榜却几乎把这条路线的脆弱性全部暴露出来。 这不是一篇“冲榜成功”的文章。最终结果说明，0.95290 以及后来更高的 Public 分数，都不能被描">
 <meta property="og:type" content="article">
-<meta property="og:title" content="从 0.87 到临时金牌线：一次 Kaggle 表格竞赛的实验管理、公开集成与行级优化复盘">
+<meta property="og:title" content="Public 第 7 到 Private 第六百多：一次 Kaggle 表格竞赛的失败复盘">
 <meta property="og:url" content="https://zhichengyellow.github.io/2026/07/26/student-health-risk-kaggle/index.html">
 <meta property="og:site_name" content="Zhicheng Yellow">
-<meta property="og:description" content="截至 2026 年 7 月 30 日，我在 Kaggle Playground Series Season 6 Episode 7：Predicting Student Health Risk 中，使用队伍 ZechHuang 的最佳提交拿到了 0.95290 的 Public Leaderboard 分数，实时排名第 10 名。最新榜单快照中，第 9 名同为 0.95290，第 8 名为 0.9">
+<meta property="og:description" content="这篇文章需要先给出一个比阶段性高分更重要的最终结论：在比赛结束前，我的 Public Leaderboard 一度冲到第 7 名，但 Private Leaderboard 开放后，排名跌到了第六百多名。Public 榜看起来接近金牌，Private 榜却几乎把这条路线的脆弱性全部暴露出来。 这不是一篇“冲榜成功”的文章。最终结果说明，0.95290 以及后来更高的 Public 分数，都不能被描">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-07-26T15:30:00.000Z">
-<meta property="article:modified_time" content="2026-07-30T07:09:25.223Z">
+<meta property="article:modified_time" content="2026-08-01T09:58:02.679Z">
 <meta property="article:author" content="Zhicheng Yellow">
 <meta property="article:tag" content="机器学习">
 <meta property="article:tag" content="Python">
@@ -39,7 +39,7 @@
   
   
   
-  <title>从 0.87 到临时金牌线：一次 Kaggle 表格竞赛的实验管理、公开集成与行级优化复盘 - Zhicheng Yellow</title>
+  <title>Public 第 7 到 Private 第六百多：一次 Kaggle 表格竞赛的失败复盘 - Zhicheng Yellow</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -205,7 +205,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="从 0.87 到临时金牌线：一次 Kaggle 表格竞赛的实验管理、公开集成与行级优化复盘"></span>
+            <span id="subtitle" data-typed-text="Public 第 7 到 Private 第六百多：一次 Kaggle 表格竞赛的失败复盘"></span>
           
         </div>
 
@@ -228,7 +228,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          5.5k 字
+          6.2k 字
         
       </span>
     
@@ -239,7 +239,7 @@
         
         
         
-          47 分钟
+          52 分钟
         
       </span>
     
@@ -276,13 +276,13 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">从 0.87 到临时金牌线：一次 Kaggle 表格竞赛的实验管理、公开集成与行级优化复盘</h1>
+            <h1 id="seo-header">Public 第 7 到 Private 第六百多：一次 Kaggle 表格竞赛的失败复盘</h1>
             
             
               <div class="markdown-body">
                 
-                <p>截至 2026 年 7 月 30 日，我在 Kaggle Playground Series Season 6 Episode 7：Predicting Student Health Risk 中，使用队伍 <code>ZechHuang</code> 的最佳提交拿到了 <code>0.95290</code> 的 Public Leaderboard 分数，实时排名第 10 名。最新榜单快照中，第 9 名同为 <code>0.95290</code>，第 8 名为 <code>0.95292</code>，第 1 名为 <code>0.95316</code>。</p>
-<p>这不是最终金牌结论。比赛截止时间是 2026 年 7 月 31 日 23:59，Private Leaderboard 的最终排名未知。更重要的是，<code>0.95290</code> 不能被描述成纯粹由我自训练模型取得的泛化成绩。它属于一条充分利用公开预测资源、公开 Notebook 和提交差异分析的“公开资源策略线”。我的自训练模型在这条路线中主要承担验证、筛选和支持票的角色。</p>
+                <p>这篇文章需要先给出一个比阶段性高分更重要的最终结论：在比赛结束前，我的 Public Leaderboard 一度冲到第 7 名，但 Private Leaderboard 开放后，排名跌到了第六百多名。Public 榜看起来接近金牌，Private 榜却几乎把这条路线的脆弱性全部暴露出来。</p>
+<p>这不是一篇“冲榜成功”的文章。最终结果说明，<code>0.95290</code> 以及后来更高的 Public 分数，都不能被描述成纯粹由我自训练模型取得的泛化成绩。它们属于充分利用公开预测资源、公开 Notebook 和提交差异分析的“公开资源策略线”。我的自训练模型在这条路线中主要承担验证、筛选和支持票的角色，而这条公开资源线最终没有通过 Private Leaderboard 的检验。</p>
 <p>这篇文章想复盘的不是“如何抄一个高分文件”，而是一个普通表格分类基线如何逐步变成可复现的实验体系：先建立本地建模能力，再分析公开预测文件，最后在高分区间针对少量决策边界样本做受保护、可解释的行级探针。</p>
 <h2 id="1-比赛指标决定了策略"><a href="#1-比赛指标决定了策略" class="headerlink" title="1. 比赛指标决定了策略"></a>1. 比赛指标决定了策略</h2><p>比赛任务是预测学生的健康风险 <code>health_condition</code>，共有三个类别：<code>at-risk</code>、<code>fit</code> 和 <code>unhealthy</code>。评价指标不是普通 Accuracy，而是 Balanced Accuracy：各类别 Recall 的平均值。</p>
 <p>对于三分类问题：</p>
@@ -313,10 +313,10 @@
 <tr>
 <td>公开资源线</td>
 <td>分析高分提交和公开模型工件</td>
-<td align="right">0.95290</td>
-<td>能利用多来源共识，适合高分区间微调</td>
-<td>容易排行榜过拟合，Private LB 风险更高</td>
-<td>不能冒充纯自训练泛化能力</td>
+<td align="right">Public 曾到第 7；Private 第六百多</td>
+<td>能快速贴近 Public 高分区间</td>
+<td>公开榜过拟合、来源相关、行级规则不迁移</td>
+<td>不能代表模型泛化能力</td>
 </tr>
 </tbody></table>
 <p>这两条线都重要，但回答的是不同问题。自训练线回答“我能不能建立一个有效的表格模型”；公开资源线回答“已有公开信息中，哪些预测差异值得进一步验证”。把它们混写，最终就会把公开方案贡献的分数误记到自己的模型上。</p>
@@ -619,12 +619,22 @@
 </tr>
 </tbody></table>
 <p>这张表同时展示了一个转折：前半段主要优化模型和特征，后半段主要优化公开文件之间的少量决策边界。两类分数都应该记录，但不能用同一种语言解释。</p>
-<h2 id="13-最终心得"><a href="#13-最终心得" class="headerlink" title="13. 最终心得"></a>13. 最终心得</h2><p>低分阶段优化模型，高分阶段优化决策边界，这是这次项目最直观的经验。类别权重、比例特征和合理验证能把普通基线从 0.87 推到接近 0.95；进入高分区间后，整体重训的收益迅速下降，提交差异、模型共识和少量受保护的行级修改才更有研究价值。</p>
-<p>但高分并不等于结论确定。验证集、Public LB 和 Private LB 是三种不同证据；公开预测文件可以分析，却会引入排行榜过拟合风险；最强模型不一定是最好的行级裁判；自训练模型可以作为支持票，却不能自动替代已经验证过的公开锚点。</p>
-<p>每次提交都应该是一场可证伪实验。失败实验和最佳模型一样值得保存，因为它们能阻止我们重复错误。越接近比赛截止时间，停止规则越重要：当 frontier 扩展到 rank 46、47 已经没有可见提升，当前已处于临时第 10 名，而新增证据不断减弱时，合理策略是保留 7 行版本并等待新的独立信号，而不是继续消费相同信息。</p>
-<p>截至 2026 年 7 月 30 日，这个项目的正确结论是：我到达了 <code>0.95290</code> 的临时 Public Leaderboard 第 10 名，与第 9 名同分，距离第 8 名还有 <code>0.00002</code>。这仍然不是最终金牌或最终排名结论，Private Leaderboard 结果未知。</p>
-<p>截至当前，最佳提交相对 <code>0.95271</code> 锚点累计有 59 行差异。它来自多层公开资源 lineage、自训练模型的辅助判断和逐行留一实验，而不是某一个自训练模型突然超过了所有公开方案。能长期复用的成果也不是某个偶然的七行或某个公开文件，而是把建模、公开资源分析、来源审计、提交验证和停止决策都变成可追踪、可复现、可被证伪的实验流程。</p>
-<p>另外，7 月 30 日的实验已经用完当日 10 次提交额度。下一步不应在同一信息基础上盲目消费额度，而应等待新的独立 <code>0.95290+</code> 公开工件，或者等额度刷新后只测试一个具有清晰来源和单变量假设的候选。当前最佳文件必须作为 fallback 永久保留。</p>
+<h2 id="13-Public-第七，Private-第六百多：真正的结局"><a href="#13-Public-第七，Private-第六百多：真正的结局" class="headerlink" title="13. Public 第七，Private 第六百多：真正的结局"></a>13. Public 第七，Private 第六百多：真正的结局</h2><p>前文记录的 <code>0.95290</code> 和第 10 名，只是 2026 年 7 月 30 日的阶段性状态。比赛结束前，继续利用公开预测 lineage、公开高分文件和少量行级修正，Public Leaderboard 一度冲到了第 7 名。这个结果当时非常诱人：距离金牌线越来越近，前面似乎只剩几个可通过微探针追赶的名次。</p>
+<p>但 Private Leaderboard 开放后，排名跌到了第六百多名。这不是简单的运气不好，也不能归因于某一个 ID 改错。它更像是整个优化方向的集中反证：我不断使用 Public 榜反馈来选择测试集行，公开方案之间又存在共享祖先和高度相关的预测，最终得到的是对 Public 切分结构的适应，而不是对完整隐藏测试集的稳健泛化。</p>
+<p>这次反转至少暴露出四个问题：</p>
+<ol>
+<li><strong>把 Public Leaderboard 当成验证集。</strong> Public 分数的连续提升，让我误以为每个新增修正都在接近真实标签；实际上，它只说明这些修正在当前公开切分上有效。</li>
+<li><strong>公开资源之间并不独立。</strong> Rayk、Zoli、Ripon 等不同作者的文件可以具有完全相同的哈希；多个公开 Notebook 的“共识”可能只是同一个上游文件的重复回声。</li>
+<li><strong>模型共识不等于测试标签证据。</strong> 三个概率模型和若干硬标签模型同时改变某一行，只能说明它们共享某种预测倾向，不能证明隐藏测试集中的真实类别发生了对应变化。</li>
+<li><strong>五位小数的微小提升被过度解释。</strong> <code>+0.00001</code>、显示持平和少量行的成功，无法支撑继续扩展整套规则；但在接近金牌线时，我仍然把这些弱证据串联成了更强的故事。</li>
+</ol>
+<p>因此，最终应把这条路线标记为 <strong>Public-resource overfit</strong>，而不是“差一点拿金牌”。Public 第 7 名是过程中的事实，Private 第六百多名才是泛化意义上的结果。后者更值得写进复盘。</p>
+<h2 id="14-最终心得"><a href="#14-最终心得" class="headerlink" title="14. 最终心得"></a>14. 最终心得</h2><p>低分阶段优化模型，高分阶段优化决策边界，这是这次项目最直观的经验。类别权重、比例特征和合理验证能把普通基线从 0.87 推到接近 0.95；进入高分区间后，整体重训的收益迅速下降，提交差异、模型共识和少量受保护的行级修改才更有研究价值。</p>
+<p>但高分并不等于结论确定。这次比赛把三种证据之间的差异变得非常残酷：验证集用于本地迭代，Public LB 反映部分公开测试切分，Private LB 才真正检验最终泛化。公开预测文件可以分析，却会引入排行榜过拟合风险；最强模型不一定是最好的行级裁判；自训练模型可以作为支持票，却不能自动替代经过冻结验证和独立 holdout 检验的最终方案。</p>
+<p>每次提交都应该是一场可证伪实验。失败实验和最佳模型一样值得保存，因为它们能阻止我们重复错误。更严格的停止规则应该是：只要 Public 提升没有被多个独立验证切分支持，就不能因为榜单名次上升而继续堆叠行级修正；越接近截止时间，越要保留一个严格按照冻结验证选择的 self-trained 候选，而不是只保留 Public 最佳文件。</p>
+<p>截至比赛结束，这个项目的正确结论是：Public Leaderboard 曾一度达到第 7 名，但 Private Leaderboard 开放后跌到了第六百多名。它不是最终金牌，也不是一个可以证明模型泛化能力的高分案例，而是一次典型的 Public-to-Private 崩塌。</p>
+<p>阶段性最佳提交相对 <code>0.95271</code> 锚点累计有 59 行差异，后续 Public 冲榜又继续叠加了公开资源 lineage 和行级修正。它们没有构成可靠的隐藏集证据。能长期复用的成果不是某个偶然的高分文件，而是这次失败明确告诉我的边界：公开榜优化必须和 self-trained 泛化线分离，来源必须去重，行级修改必须经过独立验证，最终候选必须接受 Private 风险审查。</p>
+<p>当时 7 月 30 日的实验已经用完当日 10 次提交额度，之后仍然继续追逐 Public 名次。现在回看，真正应该保留的是一个冻结验证选出的 self-trained fallback，而不是把全部希望押在 Public 最佳文件上。下一次比赛，Public 资源线最多只能作为分析分支；如果它的提升没有同步出现在独立验证或 holdout 上，就必须明确标记为 leaderboard probe，并在最终提交选择中降权。</p>
 
                 
               </div>
@@ -676,7 +686,7 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>从 0.87 到临时金牌线：一次 Kaggle 表格竞赛的实验管理、公开集成与行级优化复盘</div>
+      <div>Public 第 7 到 Private 第六百多：一次 Kaggle 表格竞赛的失败复盘</div>
       <div>https://zhichengyellow.github.io/2026/07/26/student-health-risk-kaggle/</div>
     </div>
     <div class="license-meta">
