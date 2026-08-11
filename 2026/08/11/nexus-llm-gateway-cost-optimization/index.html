@@ -1,0 +1,750 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.svg">
+  <link rel="icon" href="/img/favicon.svg">
+  
+    <link rel="canonical" href="https://zhichengyellow.github.io/2026/08/11/nexus-llm-gateway-cost-optimization/"/>
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Zhicheng Yellow">
+  <meta name="keywords" content="学习,生活,记录">
+  
+    <meta name="description" content="不优化也是一种优化：Nexus LLM Gateway 如何用真实数据降低 Token 消耗LLM 成本优化最容易犯两个错误：把统一 API 当作网关的全部价值，或把 token 变小都记作节省。 Nexus 是开源的 BYOK、OpenAI-compatible LLM Gateway，支持 7 家 Provider。核心是让优化请求可测量、可解释、可复现：缓存、压缩、去重、路由各自减少了什么，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="不优化也是一种优化：Nexus LLM Gateway 如何用真实数据降低 Token 消耗">
+<meta property="og:url" content="https://zhichengyellow.github.io/2026/08/11/nexus-llm-gateway-cost-optimization/index.html">
+<meta property="og:site_name" content="Zhicheng Yellow">
+<meta property="og:description" content="不优化也是一种优化：Nexus LLM Gateway 如何用真实数据降低 Token 消耗LLM 成本优化最容易犯两个错误：把统一 API 当作网关的全部价值，或把 token 变小都记作节省。 Nexus 是开源的 BYOK、OpenAI-compatible LLM Gateway，支持 7 家 Provider。核心是让优化请求可测量、可解释、可复现：缓存、压缩、去重、路由各自减少了什么，">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-08-11T12:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-11T14:49:58.939Z">
+<meta property="article:author" content="Zhicheng Yellow">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="AI 网关">
+<meta property="article:tag" content="TypeScript">
+<meta property="article:tag" content="成本优化">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>不优化也是一种优化：Nexus LLM Gateway 如何用真实数据降低 Token 消耗 - Zhicheng Yellow</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zhichengyellow.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Zhicheng Yellow</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/banner.svg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="不优化也是一种优化：Nexus LLM Gateway 如何用真实数据降低 Token 消耗"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-08-11 20:00" pubdate>
+          2026年8月11日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          19 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">不优化也是一种优化：Nexus LLM Gateway 如何用真实数据降低 Token 消耗</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="不优化也是一种优化：Nexus-LLM-Gateway-如何用真实数据降低-Token-消耗"><a href="#不优化也是一种优化：Nexus-LLM-Gateway-如何用真实数据降低-Token-消耗" class="headerlink" title="不优化也是一种优化：Nexus LLM Gateway 如何用真实数据降低 Token 消耗"></a>不优化也是一种优化：Nexus LLM Gateway 如何用真实数据降低 Token 消耗</h1><p>LLM 成本优化最容易犯两个错误：把统一 API 当作网关的全部价值，或把 token 变小都记作节省。</p>
+<p>Nexus 是开源的 BYOK、OpenAI-compatible LLM Gateway，支持 7 家 Provider。核心是让优化请求可测量、可解释、可复现：缓存、压缩、去重、路由各自减少了什么，优化又付出了多少代价。</p>
+<p>本文只讨论 v2.3.0 在 2026 年 8 月 10 日、DeepSeek 线上网关、缓存已预热条件下的 benchmark。所有百分比和延迟均来自仓库的 <code>benchmark/benchmark-report.md</code> 与 <code>benchmark/results/</code>；这不是对任意模型、任意流量分布的通用承诺。</p>
+<h2 id="问题：为什么“省了多少”比“接了多少模型”更难"><a href="#问题：为什么“省了多少”比“接了多少模型”更难" class="headerlink" title="问题：为什么“省了多少”比“接了多少模型”更难"></a>问题：为什么“省了多少”比“接了多少模型”更难</h2><p>实现缓存、压缩、路由和去重不难，难的是让它们在同一请求上正确协作。缓存命中后不能再把压缩收益重复计入；SingleFlight 也不能把同一份上游成本记十次。被 <code>max_tokens</code> 截断的响应即使命中缓存，也没有节省意义。</p>
+<p>因此 Nexus 的设计起点不是先宣称节省比例，而是先定义证据：每个请求必须能回答“为什么省了”“省的是哪一部分”“是实际发生还是估算”“优化代价是多少”。</p>
+<h2 id="设计：从请求路径到可解释账本"><a href="#设计：从请求路径到可解释账本" class="headerlink" title="设计：从请求路径到可解释账本"></a>设计：从请求路径到可解释账本</h2><p>Nexus 的优化链路是：精确缓存和单租户语义缓存，随后上下文压缩、SingleFlight 请求去重、智能路由，最后由 Savings Engine 和分阶段计时记录结果。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs text">请求<br>  -&gt; 精确缓存 / 语义缓存（tenantId 隔离）<br>  -&gt; 上下文压缩<br>  -&gt; SingleFlight 去重<br>  -&gt; 7 Provider 智能路由<br>  -&gt; 上游调用<br>  -&gt; Savings Engine + Optimization Overhead + Explainability<br></code></pre></td></tr></table></figure>
+
+<p>这里最重要的不是层数，而是两个约束。</p>
+<p>第一，<strong>Savings Engine 使用互斥归因</strong>。每次节省只归到一个原因：<code>CACHE</code>、<code>COMPRESSION</code>、<code>ROUTING</code>、<code>REWRITE</code> 或 <code>DEDUP</code>。这避免缓存和压缩同时宣称同一段 token 的收益，也让报表能按机制拆解。</p>
+<p>第二，<strong>ACTUAL、ESTIMATED 与 PROJECTED 严格分离</strong>。缓存命中、实际 token usage 和真实价格表能得到的，才属于 ACTUAL；基于未发生调用或模型估算得到的，只能是 ESTIMATED 或 PROJECTED。页面上把三者混成一个“已省成本”数字，短期好看，长期会失去可信度。</p>
+<p>最终每次请求记录 explainability：命中何种缓存、压缩前后 token、是否复用 in-flight 请求、路由结果、归因类型和分阶段耗时。总节省也不是只看 Gross Saving，而是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Net Saving = Gross Saving - Optimization Cost<br></code></pre></td></tr></table></figure>
+
+<p>Optimization Cost 包括为了缓存判定、压缩、路由等额外发生的开销。只统计“少发给上游多少”，却忽略网关为了做判断而付出的代价，会高估系统价值。</p>
+<h2 id="数据：不同-workload-受益于不同机制"><a href="#数据：不同-workload-受益于不同机制" class="headerlink" title="数据：不同 workload 受益于不同机制"></a>数据：不同 workload 受益于不同机制</h2><p>基线是“网关 fast 档 + 关闭缓存”，用于逼近直连调用而不是制造一个性能很差的参照组。优化组使用线上网关且缓存已预热，这对应真实使用中已经产生过相同或相近请求的场景。</p>
+<table>
+<thead>
+<tr>
+<th>Workload</th>
+<th align="right">Token Reduction</th>
+<th>延迟变化</th>
+<th>主要机制</th>
+<th>数据来源</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Repeated Prompt（同题 3 次）</td>
+<td align="right">100%</td>
+<td>1478ms -&gt; 233ms，-84%</td>
+<td>Cache</td>
+<td><code>benchmark/benchmark-report.md</code>，2026-08-10</td>
+</tr>
+<tr>
+<td>Chinese</td>
+<td align="right">100%</td>
+<td>1601ms -&gt; 306ms</td>
+<td>Cache</td>
+<td>同上</td>
+</tr>
+<tr>
+<td>Document QA</td>
+<td align="right">55.8%</td>
+<td>3883ms -&gt; 1934ms</td>
+<td>Cache + Compression</td>
+<td>同上</td>
+</tr>
+<tr>
+<td>Long Context</td>
+<td align="right">47.9%</td>
+<td>5743ms -&gt; 1383ms</td>
+<td>Cache + Compression</td>
+<td>同上</td>
+</tr>
+<tr>
+<td>Conversation</td>
+<td align="right">33.5%</td>
+<td>4533ms -&gt; 3227ms</td>
+<td>Cache + Compression</td>
+<td>同上</td>
+</tr>
+<tr>
+<td>Coding &#x2F; Short Prompt</td>
+<td align="right">约 0%</td>
+<td>不强行优化</td>
+<td>无明显压缩空间</td>
+<td>同上</td>
+</tr>
+</tbody></table>
+<p>这个表最值得关注的不是 100%，而是最后一行。短代码请求或短 prompt 没有足够冗余时，网关没有为了制造“节省”数字去压缩、重写或额外调用判断模型。结果是约 0% 的 token reduction。它并不漂亮，但它是正确结果：一个优化系统应当识别没有收益的请求，并让它原样通过。</p>
+<p>重复问题和中文 workload 的 100% reduction 来自预热缓存直接返回，并不表示模型生成本身免费。Document QA、Long Context 和 Conversation 分别受冗余、历史语境和缓存机会影响，说明不存在单一的“网关节省率”。</p>
+<h2 id="缓存：命中率之外，正确性才是硬约束"><a href="#缓存：命中率之外，正确性才是硬约束" class="headerlink" title="缓存：命中率之外，正确性才是硬约束"></a>缓存：命中率之外，正确性才是硬约束</h2><p>Nexus 同时使用精确缓存和语义缓存。语义缓存的价值在于捕捉不同措辞下的相近问题，但它的风险也最大：如果 key 只包含 prompt 文本，而没有租户边界，就可能把 A 用户的答案返回给 B 用户。</p>
+<p>这不是一般命中不准，而是跨租户串读漏洞。缓存 key 必须包含 <code>tenantId</code>，语义检索和精确命中都在单租户范围内完成。</p>
+<p>另一个真实坑是被截断的响应。上游的 <code>max_tokens</code> 过小时，响应会因 length 截断。这样的结果不能写入缓存；否则后续命中会稳定返回一段看似成功、实际不完整的答案。网关需要把“响应可缓存”作为显式判断，而不是只要 HTTP 成功就写入。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs ts"><span class="hljs-comment">// cache-policy.ts（伪代码）</span><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">cacheKey</span>(<span class="hljs-params"><span class="hljs-attr">tenantId</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">request</span>: <span class="hljs-title class_">Request</span></span>): <span class="hljs-built_in">string</span> &#123;<br>  <span class="hljs-keyword">return</span> <span class="hljs-title function_">hash</span>(&#123; tenantId, <span class="hljs-attr">system</span>: request.<span class="hljs-property">system</span>, <span class="hljs-attr">messages</span>: request.<span class="hljs-property">messages</span> &#125;);<br>&#125;<br><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">canCache</span>(<span class="hljs-params"><span class="hljs-attr">response</span>: <span class="hljs-title class_">Completion</span></span>): <span class="hljs-built_in">boolean</span> &#123;<br>  <span class="hljs-keyword">return</span> response.<span class="hljs-property">finishReason</span> !== <span class="hljs-string">&quot;length&quot;</span> &amp;&amp; response.<span class="hljs-property">isComplete</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这也是“缓存合理拒绝缓存”的含义。少一次命中可能减少纸面节省，但能避免把错误答案规模化扩散。</p>
+<h2 id="去重、路由与归因：不要让一笔账出现两次"><a href="#去重、路由与归因：不要让一笔账出现两次" class="headerlink" title="去重、路由与归因：不要让一笔账出现两次"></a>去重、路由与归因：不要让一笔账出现两次</h2><p>SingleFlight 处理的是并发重复请求：同一个 key 已经在请求上游时，后来的相同请求等待第一个结果，而不是再次发起调用。这降低的是并发峰值下的重复工作，与“历史缓存命中”不同，因此 Savings Engine 将它作为 <code>DEDUP</code> 单独归因。</p>
+<p>智能路由则在真实注册表的 7 家 Provider 候选中选择合适路径。它不是默认选择最便宜模型，而是将任务类型、模型可用性和成本约束纳入选择；没有满足约束的候选时，系统必须让降级状态可见，而不是静默突破预算。</p>
+<p>两者都不能和缓存、压缩重复计数。一个合理的账本逻辑是：先确定请求是否已经被 cache 或 dedup 消解；只有仍需生成的请求，才比较压缩或路由带来的差异；最后再区分 ACTUAL 与 ESTIMATED。这样即使多个优化条件同时成立，用户也能知道最终数字来自哪里。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs ts"><span class="hljs-comment">// savings-engine.ts（伪代码）</span><br><span class="hljs-keyword">const</span> reason = cacheHit ? <span class="hljs-string">&quot;CACHE&quot;</span><br>  : joinedInFlight ? <span class="hljs-string">&quot;DEDUP&quot;</span><br>  : compressed ? <span class="hljs-string">&quot;COMPRESSION&quot;</span><br>  : rerouted ? <span class="hljs-string">&quot;ROUTING&quot;</span><br>  : rewritten ? <span class="hljs-string">&quot;REWRITE&quot;</span><br>  : <span class="hljs-literal">null</span>;<br><br><span class="hljs-title function_">recordSaving</span>(&#123; reason, <span class="hljs-attr">mode</span>: actualUsage ? <span class="hljs-string">&quot;ACTUAL&quot;</span> : <span class="hljs-string">&quot;ESTIMATED&quot;</span> &#125;);<br></code></pre></td></tr></table></figure>
+
+<p>互斥归因不会让总数更高，恰恰相反，它阻止报表重复加总。这是成本观测系统应接受的保守性。</p>
+<h2 id="Optimization-Overhead：优化本身也要被测量"><a href="#Optimization-Overhead：优化本身也要被测量" class="headerlink" title="Optimization Overhead：优化本身也要被测量"></a>Optimization Overhead：优化本身也要被测量</h2><p>缓存查找、语义判定、压缩、路由都会增加额外工作。即使上游 token 降低了，如果这些动作的延迟和成本被忽略，系统可能只是把账单从 Provider 转移到了网关。</p>
+<p>Nexus 对 pipeline 分阶段计时，记录 Optimization Overhead，并把它放入 Net Saving 计算。这个设计有两个直接好处：一是能定位某个优化阶段是否变慢，二是能避免把“低 token”误判为“低总成本”。对 Coding &#x2F; Short Prompt 这类约 0% reduction 的 workload，正因为没有明显压缩空间，避免强行优化也意味着避免不必要 overhead。</p>
+<h2 id="可复现方法与局限"><a href="#可复现方法与局限" class="headerlink" title="可复现方法与局限"></a>可复现方法与局限</h2><p>完整方法学和原始结果位于 Nexus 仓库：</p>
+<ul>
+<li><code>benchmark/benchmark-report.md</code>：基线、workload、结果与说明。</li>
+<li><code>benchmark/results/</code>：原始 benchmark 结果。</li>
+<li><code>benchmark/benchmark-runner.mjs</code>：运行入口。</li>
+</ul>
+<p>重跑命令为：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">GATEWAY_URL=&lt;gateway-url&gt; GATEWAY_KEY=&lt;gateway-key&gt; \<br>node benchmark/benchmark-runner.mjs<br></code></pre></td></tr></table></figure>
+
+<p>限制也很明确：数据来自 DeepSeek 线上网关，不能外推为其他模型；缓存预热对应真实重复使用，但冷启动和低重复流量会不同；workload 分布、上下文和网络状态都会影响结果。</p>
+<p>截至 v2.3.0，项目有 403+ 自动化测试、54 个测试文件，CI 通过并部署在 Render。这说明核心行为经过了较广覆盖的回归验证，但不替代针对具体业务流量的 benchmark。</p>
+<h2 id="展望：把“更省”变成可证伪的工程结论"><a href="#展望：把“更省”变成可证伪的工程结论" class="headerlink" title="展望：把“更省”变成可证伪的工程结论"></a>展望：把“更省”变成可证伪的工程结论</h2><p>一个可信的 AI Gateway 不应承诺一个脱离条件的节省百分比。它应该让开发者看到：本次请求是否命中缓存，为什么没有命中，压缩减少了多少输入，是否由 SingleFlight 复用，路由是否改变，优化开销多大，以及最终是 ACTUAL、ESTIMATED 还是 PROJECTED。</p>
+<p>下一步应扩大可观测性、完善隔离和缓存策略，并用更多 workload 验证 Net Saving。短 prompt 的约 0% 结果说明，网关也必须知道什么时候不该出手。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/AI-%E5%B7%A5%E7%A8%8B/" class="category-chain-item">AI 工程</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/LLM/" class="print-no-link">#LLM</a>
+      
+        <a href="/tags/AI-%E7%BD%91%E5%85%B3/" class="print-no-link">#AI 网关</a>
+      
+        <a href="/tags/TypeScript/" class="print-no-link">#TypeScript</a>
+      
+        <a href="/tags/%E6%88%90%E6%9C%AC%E4%BC%98%E5%8C%96/" class="print-no-link">#成本优化</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>不优化也是一种优化：Nexus LLM Gateway 如何用真实数据降低 Token 消耗</div>
+      <div>https://zhichengyellow.github.io/2026/08/11/nexus-llm-gateway-cost-optimization/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Zhicheng Yellow</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年8月11日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/07/26/student-health-risk-kaggle/" title="Public 第 7 到 Private 第六百多：一次 Kaggle 表格竞赛的失败复盘">
+                        <span class="hidden-mobile">Public 第 7 到 Private 第六百多：一次 Kaggle 表格竞赛的失败复盘</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <span>© 2026 Zhicheng Yellow</span> <span class="mx-2">·</span> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
